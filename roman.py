@@ -1,6 +1,6 @@
-from abc import abstractmethod
-from numbers import Integral, Real, Complex
-from typing import Any, overload
+"""
+Definition of the RomanPy module.
+"""
 
 _ENCODING_ASCII = "ascii"
 _ENCODING_UNICODE = "unicode"
@@ -211,4 +211,5 @@ class _RomanNumeral:
     __rfloordiv__ = __floordiv__
 
 
+# pylint:disable = invalid-name
 roman = _RomanNumeral
