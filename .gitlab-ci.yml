@@ -25,7 +25,7 @@ pytest:
   coverage: /^TOTAL[\\s\\d]+\\s(\\d+\\%)$/
   script:
     - pip install . pytest coverage
-    - coverage run --source=ris -m pytest --junitxml pytest.xml test
+    - coverage run --source=roman -m pytest --junitxml pytest.xml test
     - coverage xml -o coverage.xml
     - coverage report
   needs: [ ]
@@ -52,7 +52,7 @@ test-pypi:
   extends: .publish
   environment:
     name: TestPyPI
-    url:  https://test.pypi.org/project/risify/
+    url:  https://test.pypi.org/project/roman-py/
   variables:
     TWINE_USERNAME:   __token__
     TWINE_PASSWORD:   $TEST_PYPI_TOKEN
@@ -66,7 +66,7 @@ pypi:
   extends: .publish
   environment:
     name: PyPI
-    url:  https://pypi.org/project/risify/
+    url:  https://pypi.org/project/roman-py/
   variables:
     TWINE_USERNAME:   __token__
     TWINE_PASSWORD:   $PYPI_TOKEN
