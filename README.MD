@@ -1,7 +1,7 @@
 # RomanPy
 
-[![pipeline status](https://gitlab.com/parcifal/roman-py/badges/master/pipeline.svg)](https://gitlab.com/parcifal/roman-py/-/pipelines)  
-[![coverage report](https://gitlab.com/parcifal/roman-py/badges/master/coverage.svg)](https://gitlab.com/parcifal/roman-py/-/commits/master)  
+[![pipeline status](https://gitlab.com/parcifal/roman-py/badges/master/pipeline.svg)](https://gitlab.com/parcifal/roman-py/-/pipelines)
+[![coverage report](https://gitlab.com/parcifal/roman-py/badges/master/coverage.svg)](https://gitlab.com/parcifal/roman-py/-/commits/master)
 [![PyPI version](https://img.shields.io/pypi/v/RomanPy)][pypi]
 
 RomanPy is a simple Python library for converting between decimal numbers and 
