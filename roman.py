@@ -240,6 +240,10 @@ def version() -> str:
 
 
 def cli():
+    """
+    Provide a CLI for converting decimal numbers to Roman numerals.
+    """
+
     parser = ArgumentParser(prog="roman",
                             description="Convert a decimal number to roman "
                                         "numeral.")
@@ -271,7 +275,7 @@ def cli():
 
     args = parser.parse_args()
 
-    if not re.fullmatch("\d+", args.value):
+    if not re.fullmatch(r"\d+", args.value):
         parser.error("value must be an integer")
 
     args.ASCII = not args.ascii and not args.unicode and not args.UNICODE
