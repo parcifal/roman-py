@@ -1,8 +1,8 @@
-.pytest_cache/
-__pycache__/
-venv/
 build/
 *.egg-info/
-dist/
-.coverage
+__pycache__/
+.venv/
+
 pytest.xml
+coverage.xml
+.coverage
