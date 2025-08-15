@@ -1,89 +1,130 @@
 stages:
-  - lint
-  - test
+  - setup
+  - validate
   - build
-  - publish
+  - release
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+
+.toml-attribute:
+  image: python:3
+  stage: setup
+  variables:
+    TOML_SECTION: project
+  script:
+    - ATTRIBUTE=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))[$TOML_SECTION][$TOML_ATTRIBUTE])")
+    - echo "$VARIABLE=$ATTRIBUTE" >> variables.env
+  artifacts:
+    reports:
+      dotenv: variables.env
+
+name:
+  extends: .toml-attribute
+  variables:
+    TOML_ATTRIBUTE: name
+    VARIABLE: NAME
+
+.python-dev:
+  image: python:3
+  before_script:
+    - pip install --upgrade pip
+    - pip install .[dev]
+  needs: [ ]
 
 pylint:
-  image: python
-  stage: lint
+  extends: .python-dev
+  stage: validate
   script:
-    - pip install . pylint
-    - pylint *.py test
-  needs: [ ]
-  dependencies: [ ]
+    - pylint --output-format=pylint_gitlab.GitlabCodeClimateReporter:pylint.txt roman.py test
+  artifacts:
+    reports:
+      codequality: pylint.txt
+    paths:
+      - pylint.txt
 
 pytest:
-  image: python
-  stage: test
+  extends: .python-dev
+  stage: validate
+  script:
+    - pytest
   artifacts:
     reports:
       junit: pytest.xml
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-  coverage: /^TOTAL[\\s\\d]+\\s(\\d+\\%)$/
-  script:
-    - pip install . pytest coverage
-    - coverage run --source=roman -m pytest --junitxml pytest.xml test
-    - coverage xml -o coverage.xml
-    - coverage report
-  needs: [ ]
-  dependencies: [ ]
+    paths:
+      - pytest.xml
+      - coverage.xml
+  coverage: '/TOTAL.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
 
-setup:
-  image: python
+python-build:
+  image: python:3
   stage: build
+  script:
+    - pip install --upgrade pip
+    - pip install --upgrade build
+    - python -m build
   artifacts:
     paths:
       - dist/*
-  script:
-    - pip install --upgrade build
-    - python -m build
 
-.publish:
-  image: python
-  stage: publish
+.twine:
+  image: python:3
+  stage: release
   script:
+    - pip install --upgrade pip
     - pip install twine
     - python -m twine upload --verbose --repository $TWINE_REPOSITORY dist/*
+  needs:
+    - python-build
 
-test-pypi:
-  extends: .publish
-  environment:
-    name: TestPyPI
-    url:  https://test.pypi.org/project/roman-py/
+twine-testpypi:
+  extends: .twine
   variables:
-    TWINE_USERNAME:   __token__
-    TWINE_PASSWORD:   $TEST_PYPI_TOKEN
+    TWINE_USERNAME: __token__
+    TWINE_PASSWORD: $TEST_PYPI_TOKEN
     TWINE_REPOSITORY: testpypi
-  dependencies:
-    - setup
   only:
     - develop
+  environment:
+    name: TestPyPI
+    url: https://test.pypi.org/project/$NAME/
+  needs:
+    - name
+    - python-build
 
-pypi:
-  extends: .publish
+twine-pypi:
+  extends: .twine
+  variables:
+    TWINE_USERNAME: __token__
+    TWINE_PASSWORD: $PYPI_TOKEN
+    TWINE_REPOSITORY: pypi
+  only:
+    - master
   environment:
     name: PyPI
-    url:  https://pypi.org/project/roman-py/
-  variables:
-    TWINE_USERNAME:   __token__
-    TWINE_PASSWORD:   $PYPI_TOKEN
-    TWINE_REPOSITORY: pypi
-  dependencies:
-    - setup
-  only:
-    - master
+    url: https://pypi.org/project/$NAME/
+  needs:
+    - name
+    - python-build
 
-gitlab:
-  extends: .publish
+twine-gitlab:
+  extends: .twine
   variables:
-    TWINE_USERNAME:        $CI_REGISTRY_USER
-    TWINE_PASSWORD:        $CI_REGISTRY_PASSWORD
-    TWINE_REPOSITORY:      gitlab
-    TWINE_REPOSITORY_URL:  $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/pypi
-  dependencies:
-    - setup
+    TWINE_USERNAME: $CI_REGISTRY_USER
+    TWINE_PASSWORD: $CI_REGISTRY_PASSWORD
+    TWINE_REPOSITORY: gitlab
+    TWINE_REPOSITORY_URL: $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/pypi
   only:
     - master
+  environment:
+    name: GitLab Package Registry
+    url: "$CI_PROJECT_URL/-/packages/pypi"
+  needs:
+    - python-build

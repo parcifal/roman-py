@@ -1,93 +1,110 @@
 # RomanPy
 
-`RomanPy` is a Python library that provides a simple and efficient way to 
-convert decimal numbers to Roman numerals. With its user-friendly interface, 
-you can easily integrate this library into your Python projects and take 
-advantage of its features to convert numerals in a matter of seconds.
+[![pipeline status](https://gitlab.com/parcifal/roman-py/badges/master/pipeline.svg)](https://gitlab.com/parcifal/roman-py/-/pipelines)  
+[![coverage report](https://gitlab.com/parcifal/roman-py/badges/master/coverage.svg)](https://gitlab.com/parcifal/roman-py/-/commits/master)  
+[![PyPI version](https://img.shields.io/pypi/v/RomanPy)][pypi]
+
+RomanPy is a simple Python library for converting between decimal numbers and 
+Roman numerals. It supports ASCII and Unicode output, upper- and lowercase
+forms, and even allows arithmetic operations with Roman numerals.
+
+> Licensed under the [AGPLv3.0](LICENSE).
 
 ## Installation
 
-To install `RomanPy`, you can use pip:
-
-```shell
+```bash
 pip install RomanPy
 ```
 
-This library has no dependencies and is compatible with Python 3.
-
 ## Usage
 
-To use RomanPy, you need to import the `roman` function:
+### Basic Conversion
 
 ```python
 from roman import roman
+
+print(roman(207))  # CCVII
 ```
 
-Then, you can convert decimal numbers to Roman numerals:
+### Encoding and Case Variants
 
-```python
-print(roman(207)) # CCVII
-```
-
-ASCII and unicode variants of the Roman numerals are supported in both lower-
-and uppercase, using the conventional API known from `str`:
+RomanPy supports ASCII and Unicode numerals, both in upper- and lowercase,  
+using methods similar to Python’s built-in `str` API:
 
 ```python
 numeral = roman(1776)
 
-numeral = numeral.encode("ascii") # default
-numeral = numeral.upper() # default
+# ascii (default), uppercase (default)
+print(numeral.encode("ascii").upper())  # MDCCLXXVI
 
-print(numeral) # MDCCLXXVI (default)
+# ascii, lowercase
+print(numeral.encode("ascii").lower())  # mdcclxxvi
 
-numeral = numeral.lower()
+# unicode, uppercase
+print(numeral.encode("unicode").upper())  # ⅯⅮⅭⅭⅬⅩⅩⅥ
 
-print(numeral) # mdcclxxvi
-
-numeral = numeral.encode("unicode")
-numeral = numeral.upper()
-
-print(numeral) # ⅯⅮⅭⅭⅬⅩⅩⅥ
-
-numeral = numeral.lower()
-
-print(numeral) # ⅿⅾⅽⅽⅼⅹⅹⅵ
+# unicode, lowercase
+print(numeral.encode("unicode").lower())  # ⅿⅾⅽⅽⅼⅹⅹⅵ
 ```
 
-`RomanPy` also allows you to do simple arithmatic with roman numerals:
+### Arithmetic with Roman Numerals
+
+Roman numerals can be added, subtracted, multiplied, or divided with  
+other Roman numerals or integers:
 
 ```python
-print(roman(100) + roman(60)) # CLX
-print(roman(45) - roman(7)) # XXXIX
-print(roman(533) * roman(2)) # MLXVI
-print(roman(2460) / roman(10)) # CCXLVI
+print(roman(100) + roman(60))   # CLX
+print(roman(45) - roman(7))     # XXXIX
+print(roman(533) * roman(2))    # MLXVI
+print(roman(2460) / roman(10))  # CCXLVI
+
+# mixing with integers
+print(100 + roman(60))          # CLX
+print(roman(45) - 7)            # XXXIX
+print(roman(533) * 2)           # MLXVI
+print(2460 / roman(10))         # CCXLVI
 ```
 
-One hand of these operations is also allowed to be an integer:
+### Comparisons
+
+Equality works between Roman numerals, integers, and strings:
 
 ```python
-print(100 + roman(60)) # CLX
-print(roman(45) - 7) # XXXIX
-print(roman(533) * 2) # MLXVI
-print(2460 / roman(10)) # CCXLVI
+print(roman(335) == roman(335))     # True
+print(roman(24) == 24)              # True
+print(roman(1954) == "MCMLIV")      # True
 ```
 
-Equality can be determined for other Roman numerals, integers and strings:
+## Command-Line Tool
 
-```python
-print(roman(335) == roman(335)) # True
-print(roman(24) == 24) # True
-print(roman(1954) == "MCMLIV") # True
+Installing `RomanPy` also provides a `roman` CLI tool for quick conversions.
+
+```bash
+roman 42 # = XLII
+```
+
+### CLI Usage
+```help
+usage: roman [-h] [-a | -A | -u | -U] [-v] value
+
+Convert a decimal number to roman numeral.
+
+positional arguments:
+  value          a decimal number to convert to a Roman numeral
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -a, --ascii    output encoding of Roman numerals in lowercase ASCII
+  -A, --ASCII    output encoding of Roman numerals in uppercase ASCII (default)
+  -u, --unicode  output encoding of Roman numerals in lowercase unicode
+  -U, --UNICODE  output encoding of Roman numerals in uppercase unicode
+  -v, --version  show program's version number and exit
 ```
 
 ## Contributing
 
-If you find any bugs or issues with `RomanPy`, please feel free to submit an 
-issue on our GitLab page. We welcome any contributions or suggestions to 
-improve this library.
+Found a bug? Have a suggestion? Open an issue or submit a merge request at 
+[the GitLab repository](https://gitlab.com/parcifal/roman-py). All 
+contributions are welcome.
 
-## License
-
-`RomanPy` is released under the GPLv3 license. See [LICENSE](LICENCE) for
-details.
-
+[pypi]: https://pypi.org/project/RomanPy/
