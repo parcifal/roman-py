@@ -1,6 +1,12 @@
 """
 Definition of the RomanPy module.
 """
+import os
+import re
+from argparse import ArgumentParser
+from importlib import metadata
+
+import tomli
 
 _ENCODING_ASCII = "ascii"
 _ENCODING_UNICODE = "unicode"
@@ -213,3 +219,74 @@ class _RomanNumeral:
 
 # pylint:disable = invalid-name
 roman = _RomanNumeral
+
+def version() -> str:
+    """
+    Provide the current version of RomanPy.
+
+    :return: The current version of RomanPy.
+    """
+    try:
+        return metadata.version("RomanPy")
+    except metadata.PackageNotFoundError:
+        pass
+
+    path = os.path.join(os.path.dirname(__file__), "pyproject.toml")
+    with open(path, "rb") as file:
+        toml = tomli.load(file)
+    assert ("project" in toml and "version" in toml["project"]), \
+        "Missing version in pyproject.toml"
+    return toml["project"]["version"]
+
+
+def cli():
+    """
+    Provide a CLI for converting decimal numbers to Roman numerals.
+    """
+
+    parser = ArgumentParser(prog="roman",
+                            description="Convert a decimal number to roman "
+                                        "numeral.")
+
+    encoding_group = parser.add_mutually_exclusive_group()
+    encoding_group.add_argument("-a", "--ascii",
+                                action="store_true",
+                                help="output encoding of Roman numerals in "
+                                     "lowercase ASCII")
+    encoding_group.add_argument("-A", "--ASCII",
+                                action="store_true",
+                                help="output encoding of Roman numerals in "
+                                     "uppercase ASCII (default)")
+    encoding_group.add_argument("-u", "--unicode",
+                                action="store_true",
+                                help="output encoding of Roman numerals in "
+                                     "lowercase unicode")
+    encoding_group.add_argument("-U", "--UNICODE",
+                                action="store_true",
+                                help="output encoding of Roman numerals in "
+                                     "uppercase unicode")
+
+    parser.add_argument("-v", "--version",
+                        action="version",
+                        version=version())
+
+    parser.add_argument("value",
+                        help="a decimal number to convert to a Roman numeral")
+
+    args = parser.parse_args()
+
+    if not re.fullmatch(r"\d+", args.value):
+        parser.error("value must be an integer")
+
+    args.ASCII = not args.ascii and not args.unicode and not args.UNICODE
+
+    uppercase = args.ASCII or args.UNICODE
+
+    if args.ascii or args.ASCII:
+        encoding = _ENCODING_ASCII
+    else:
+        encoding = _ENCODING_UNICODE
+
+    return _RomanNumeral(int(args.value),
+                         encoding=encoding,
+                         uppercase=uppercase)
