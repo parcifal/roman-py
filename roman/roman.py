@@ -1,32 +1,73 @@
 """
 Definition of the RomanPy module.
 """
-import os
-import re
-from argparse import ArgumentParser
-from importlib import metadata
-
-import tomli
+from typing import Union
 
 _ENCODING_ASCII = "ascii"
 _ENCODING_UNICODE = "unicode"
 
-_ROMAN_NUMERALS = {
-    1000: "M",
-    900: "CM",
-    500: "D",
-    400: "CD",
-    100: "C",
-    50: "L",
-    40: "XL",
-    10: "X",
-    9: "IX",
+VARIANT_BASE = {
+    0: "N",
+    1: "I",
     5: "V",
-    4: "IV",
-    1: "I"
+    10: "X",
+    50: "L",
+    100: "C",
+    500: "D",
+    1000: "M"
 }
 
-_ROMAN_MAPPING_UNICODE_UPPER = {
+VARIANT_SUBTRACTIVE = {
+    4: "IV",
+    9: "IX",
+    40: "XL",
+    400: "CD",
+    900: "CM"
+}
+
+VARIANT_SUBTRACTIVE_EXTENDED = {
+    8: "IIX",
+    17: "IIIXX",
+    18: "IIXX",
+    97: "IIIC",
+    98: "IIC",
+    99: "IC"
+}
+
+VARIANT_APOSTROPHUS = {
+    500: "I)",
+    1000: "(I)",
+    5000: "I))",
+    10000: "((I))",
+    50000: "I)))",
+    100000: "(((I)))"
+}
+
+VARIANT_MEDIEVAL = {
+    5: "A",
+    7: "Z",
+    11: "O",
+    40: "F",
+    70: "S",
+    80: "R",
+    90: "N",
+    150: "Y",
+    151: "K",
+    160: "T",
+    200: "H",
+    250: "E",
+    300: "B",
+    400: "P",
+    500: "Q"
+}
+
+_MAPPING_UNICODE_UPPER = {
+    "(((I)))": "ↈ",
+    "I)))": "ↇ",
+    "((I))": "ↂ",
+    "I))": "ↁ",
+    "(I)": "ↀ",
+    "I)": "Ⅾ",
     "IX": "Ⅸ",
     "IV": "Ⅳ",
     "XII": "Ⅻ",
@@ -42,10 +83,12 @@ _ROMAN_MAPPING_UNICODE_UPPER = {
     "L": "Ⅼ",
     "X": "Ⅹ",
     "V": "Ⅴ",
-    "I": "Ⅰ"
+    "I": "Ⅰ",
 }
 
-_ROMAN_MAPPING_UNICODE_LOWER = {
+_MAPPING_UNICODE_LOWER = {
+    ")": "ↄ",
+    "(": "ⅽ",
     "IX": "ⅸ",
     "IV": "ⅳ",
     "XII": "ⅻ",
@@ -64,23 +107,37 @@ _ROMAN_MAPPING_UNICODE_LOWER = {
     "I": "ⅰ"
 }
 
+_ENCODINGS = [
+    _ENCODING_ASCII,
+    _ENCODING_UNICODE,
+]
+
+_DEFAULT_ENCODING = _ENCODING_ASCII
+_DEFAULT_VARIANT = VARIANT_BASE | VARIANT_SUBTRACTIVE
+
 
 class _RomanNumeral:
     """
     The roman numeral class.
     """
 
-    def __init__(self, value: int, **kwargs):
-        assert value > 0, "a roman numeral cannot have a value smaller or " \
-                          "equal to zero"
+    def __init__(self,
+                 value: int,
+                 encoding: str = _DEFAULT_ENCODING,
+                 uppercase: bool = True,
+                 variant: Union[dict[int, str], list[str]] = None):
+
+        assert value >= 0, "a roman numeral cannot be negative"
+        assert encoding in _ENCODINGS, \
+            f"specified encoding \"{encoding}\" unknown"
+
+        if variant is None:
+            variant = _DEFAULT_VARIANT
 
         self._value = value
-
-        self._encoding = kwargs.pop("encoding", _ENCODING_ASCII)
-        self._uppercase = kwargs.pop("uppercase", True)
-
-        assert self._encoding in (_ENCODING_ASCII, _ENCODING_UNICODE), \
-            f"specified encoding \"{self._encoding}\" unknown"
+        self._encoding = encoding
+        self._uppercase = uppercase
+        self._variant = variant
 
     def encode(self, encoding: str):
         """
@@ -88,8 +145,9 @@ class _RomanNumeral:
         roman numeral, with the specified encoding.
         """
         return _RomanNumeral(self._value,
-                             encoding=encoding,
-                             uppercase=self._uppercase)
+                             encoding,
+                             self._uppercase,
+                             self._variant)
 
     def upper(self):
         """
@@ -97,8 +155,9 @@ class _RomanNumeral:
         roman numeral, in uppercase.
         """
         return _RomanNumeral(self._value,
-                             encoding=self._encoding,
-                             uppercase=True)
+                             self._encoding,
+                             True,
+                             self._variant)
 
     def lower(self):
         """
@@ -106,14 +165,40 @@ class _RomanNumeral:
         roman numeral, in lowercase.
         """
         return _RomanNumeral(self._value,
-                             encoding=self._encoding,
-                             uppercase=False)
+                             self._encoding,
+                             False,
+                             self._variant)
+
+    def extend_variant(self, variant: dict[int, str]):
+        """
+        Return a roman numeral, identical to the current one, with current
+        variant extended as specified.
+        """
+        return _RomanNumeral(self._value,
+                             self._encoding,
+                             self._uppercase,
+                             self._variant | variant)
+
+    def set_variant(self, variant: dict[int, str]):
+        """
+        Return a roman numeral, identical to the current one, with the
+        variant as specified.
+        """
+        return _RomanNumeral(self._value,
+                             self._encoding,
+                             self._uppercase,
+                             variant)
 
     def __str__(self):
+        if self._value == 0:
+            return self._variant.get(0, "")
+
         carry = self._value
         numeral = ""
 
-        for value, digit in _ROMAN_NUMERALS.items():
+        for value, digit in sorted(self._variant.items(), reverse=True):
+            if value == 0:
+                continue
             while value <= carry:
                 carry = carry - value
                 numeral = numeral + digit
@@ -121,8 +206,8 @@ class _RomanNumeral:
         if self._encoding is _ENCODING_ASCII:
             return numeral if self._uppercase else numeral.lower()
 
-        mapping = _ROMAN_MAPPING_UNICODE_UPPER if self._uppercase else \
-            _ROMAN_MAPPING_UNICODE_LOWER
+        mapping = _MAPPING_UNICODE_UPPER if self._uppercase else \
+            _MAPPING_UNICODE_LOWER
 
         for old, new in mapping.items():
             numeral = numeral.replace(old, new)
@@ -215,78 +300,3 @@ class _RomanNumeral:
         return NotImplemented
 
     __rfloordiv__ = __floordiv__
-
-
-# pylint:disable = invalid-name
-roman = _RomanNumeral
-
-def version() -> str:
-    """
-    Provide the current version of RomanPy.
-
-    :return: The current version of RomanPy.
-    """
-    try:
-        return metadata.version("RomanPy")
-    except metadata.PackageNotFoundError:
-        pass
-
-    path = os.path.join(os.path.dirname(__file__), "pyproject.toml")
-    with open(path, "rb") as file:
-        toml = tomli.load(file)
-    assert ("project" in toml and "version" in toml["project"]), \
-        "Missing version in pyproject.toml"
-    return toml["project"]["version"]
-
-
-def cli():
-    """
-    Provide a CLI for converting decimal numbers to Roman numerals.
-    """
-
-    parser = ArgumentParser(prog="roman",
-                            description="Convert a decimal number to roman "
-                                        "numeral.")
-
-    encoding_group = parser.add_mutually_exclusive_group()
-    encoding_group.add_argument("-a", "--ascii",
-                                action="store_true",
-                                help="output encoding of Roman numerals in "
-                                     "lowercase ASCII")
-    encoding_group.add_argument("-A", "--ASCII",
-                                action="store_true",
-                                help="output encoding of Roman numerals in "
-                                     "uppercase ASCII (default)")
-    encoding_group.add_argument("-u", "--unicode",
-                                action="store_true",
-                                help="output encoding of Roman numerals in "
-                                     "lowercase unicode")
-    encoding_group.add_argument("-U", "--UNICODE",
-                                action="store_true",
-                                help="output encoding of Roman numerals in "
-                                     "uppercase unicode")
-
-    parser.add_argument("-v", "--version",
-                        action="version",
-                        version=version())
-
-    parser.add_argument("value",
-                        help="a decimal number to convert to a Roman numeral")
-
-    args = parser.parse_args()
-
-    if not re.fullmatch(r"\d+", args.value):
-        parser.error("value must be an integer")
-
-    args.ASCII = not args.ascii and not args.unicode and not args.UNICODE
-
-    uppercase = args.ASCII or args.UNICODE
-
-    if args.ascii or args.ASCII:
-        encoding = _ENCODING_ASCII
-    else:
-        encoding = _ENCODING_UNICODE
-
-    return _RomanNumeral(int(args.value),
-                         encoding=encoding,
-                         uppercase=uppercase)

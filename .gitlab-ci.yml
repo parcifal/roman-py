@@ -40,7 +40,7 @@ pylint:
   extends: .python-dev
   stage: validate
   script:
-    - pylint --output-format=pylint_gitlab.GitlabCodeClimateReporter:pylint.txt roman.py test
+    - pylint --output-format=pylint_gitlab.GitlabCodeClimateReporter:pylint.txt roman test
   artifacts:
     reports:
       codequality: pylint.txt

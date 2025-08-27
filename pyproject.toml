@@ -4,7 +4,7 @@ build-backend  = "setuptools.build_meta"
 
 [project]
 name           = "RomanPy"
-version        = "1.1.1"
+version        = "1.2.0"
 description    = "Effortlessly convert decimal numbers to Roman numerals in Python."
 readme         = "README.MD"
 license        = "AGPL-3.0-only"
@@ -27,7 +27,7 @@ dependencies = [ "tomli" ]
 "Bug Tracker"  = "https://gitlab.com/parcifal/roman-py/-/issues"
 
 [project.scripts]
-roman = "roman:cli"
+roman = "roman.cli:run"
 
 [project.optional-dependencies]
 dev = [
@@ -37,3 +37,6 @@ dev = [
     "pytest-cov",
     "coverage"
 ]
+
+[tool.setuptools.packages.find]
+include = [ "roman" ]
