@@ -33,7 +33,7 @@ cd roman-py
 pip install .
 ```
 
-## Usage
+## Usage (API)
 
 ### Basic Conversion
 
@@ -43,7 +43,16 @@ from roman import roman
 print(roman(207))  # CCVII
 ```
 
-## Encoding and Case Variants
+### Encoding and Case Variants
+
+```bash
+n = roman(1776)
+
+print(n.encode("ascii").upper())   # MDCCLXXVI
+print(n.encode("ascii").lower())   # mdcclxxvi
+print(n.encode("unicode").upper()) # ⅯⅮⅭⅭⅬⅩⅩⅥ
+print(n.encode("unicode").lower()) # ⅿⅾⅽⅽⅼⅹⅹⅵ
+```
 
 ### Arithmetic with Roman Numerals
 
@@ -52,15 +61,13 @@ other Roman numerals or integers:
 
 ```python
 print(roman(100) + roman(60))   # CLX
-print(roman(45) - roman(7))     # XXXIX
-print(roman(533) * roman(2))    # MLXVI
-print(roman(2460) / roman(10))  # CCXLVI
+print(roman(45) - roman(7))     # XXXVIII
+print(roman(533) * 2)                   # MLXVI
+print(roman(2460) // 10)                # CCXLVI
 
-# mixing with integers
-print(100 + roman(60))          # CLX
-print(roman(45) - 7)            # XXXIX
-print(roman(533) * 2)           # MLXVI
-print(2460 / roman(10))         # CCXLVI
+# mix with ints
+print(100 + roman(60))                  # CLX
+print(roman(1954) == "MCMLIV")          # True
 ```
 
 ### Custom Variants
