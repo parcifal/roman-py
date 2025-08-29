@@ -7,7 +7,6 @@ _ENCODING_ASCII = "ascii"
 _ENCODING_UNICODE = "unicode"
 
 VARIANT_BASE = {
-    0: "N",
     1: "I",
     5: "V",
     10: "X",
@@ -15,6 +14,10 @@ VARIANT_BASE = {
     100: "C",
     500: "D",
     1000: "M"
+}
+
+VARIANT_ZERO = {
+    0: "N"
 }
 
 VARIANT_SUBTRACTIVE = {
@@ -116,84 +119,81 @@ _DEFAULT_ENCODING = _ENCODING_ASCII
 _DEFAULT_VARIANT = VARIANT_BASE | VARIANT_SUBTRACTIVE
 
 
-class _RomanNumeral:
+class _RomanNumeral(int):
     """
     The roman numeral class.
     """
 
-    def __init__(self,
-                 value: int,
-                 encoding: str = _DEFAULT_ENCODING,
-                 uppercase: bool = True,
-                 variant: Union[dict[int, str], list[str]] = None):
+    _encoding: str
+    _uppercase: bool
+    _variant: dict[int, str]
 
-        assert value >= 0, "a roman numeral cannot be negative"
-        assert encoding in _ENCODINGS, \
-            f"specified encoding \"{encoding}\" unknown"
+    def __new__(cls,
+                value: Union[int, "_RomanNumeral"],
+                encoding: str = None,
+                uppercase: bool = None,
+                variant: dict[int, str] = None):
+        """
+        Return an instance of a roman numeral with the specified properties.
+        If the specified value is also a roman numeral, its properties will
+        be used as a fallback for any properties that have not been specified.
+        """
+        if encoding is not None and encoding not in _ENCODINGS:
+            raise ValueError(f"unknown encoding `{encoding}`")
+        if value < 0:
+            raise ValueError("a roman numeral cannot be negative")
 
-        if variant is None:
-            variant = _DEFAULT_VARIANT
+        instance = super().__new__(cls, value)
 
-        self._value = value
-        self._encoding = encoding
-        self._uppercase = uppercase
-        self._variant = variant
+        instance._encoding = encoding or getattr(value, "_encoding",
+                                                 _DEFAULT_ENCODING)
+        instance._uppercase = uppercase if uppercase is not None \
+            else getattr(value, "_uppercase", True)
+        instance._variant = variant or getattr(value, "_variant",
+                                               _DEFAULT_VARIANT)
+
+        return instance
 
     def encode(self, encoding: str):
         """
         Return a roman numeral of the same value and case as the current
         roman numeral, with the specified encoding.
         """
-        return _RomanNumeral(self._value,
-                             encoding,
-                             self._uppercase,
-                             self._variant)
+        return _RomanNumeral(self, encoding=encoding)
 
     def upper(self):
         """
         Return a roman numeral of the same value and encoding as the current
         roman numeral, in uppercase.
         """
-        return _RomanNumeral(self._value,
-                             self._encoding,
-                             True,
-                             self._variant)
+        return _RomanNumeral(self, uppercase=True)
 
     def lower(self):
         """
         Return a roman numeral of the same value and encoding as the current
         roman numeral, in lowercase.
         """
-        return _RomanNumeral(self._value,
-                             self._encoding,
-                             False,
-                             self._variant)
+        return _RomanNumeral(self, uppercase=False)
 
     def extend_variant(self, variant: dict[int, str]):
         """
         Return a roman numeral, identical to the current one, with current
         variant extended as specified.
         """
-        return _RomanNumeral(self._value,
-                             self._encoding,
-                             self._uppercase,
-                             self._variant | variant)
+        return _RomanNumeral(self, variant=self._variant | variant)
 
     def set_variant(self, variant: dict[int, str]):
         """
         Return a roman numeral, identical to the current one, with the
         variant as specified.
         """
-        return _RomanNumeral(self._value,
-                             self._encoding,
-                             self._uppercase,
-                             variant)
+        return _RomanNumeral(self, variant=variant)
 
     def __str__(self):
-        if self._value == 0:
+        if int(self) == 0:
             return self._variant.get(0, "")
 
-        carry = self._value
+        carry = int(self)
         numeral = ""
 
         for value, digit in sorted(self._variant.items(), reverse=True):
@@ -203,7 +203,7 @@ class _RomanNumeral:
                 carry = carry - value
                 numeral = numeral + digit
 
-        if self._encoding is _ENCODING_ASCII:
+        if self._encoding == _ENCODING_ASCII:
             return numeral if self._uppercase else numeral.lower()
 
         mapping = _MAPPING_UNICODE_UPPER if self._uppercase else \
@@ -214,89 +214,53 @@ class _RomanNumeral:
 
         return numeral
 
-    __repr__ = __str__
+    def __repr__(self):
+        return f"roman({int(self)})"
 
     def __eq__(self, other):
-        if isinstance(other, _RomanNumeral):
-            return self._value == other._value
-        if isinstance(other, int):
-            return self._value == other
         if isinstance(other, str):
-            return str(self) == other
-        return NotImplemented
+            return str(self).upper() == other.upper()
+        return super().__eq__(other)
 
     def __ne__(self, other):
-        return not other == self
+        if isinstance(other, str):
+            return str(self).upper() != other.upper()
+        return super().__ne__(other)
 
-    def __gt__(self, other):
-        if isinstance(other, _RomanNumeral):
-            return self._value > other._value
-        if isinstance(other, int):
-            return self._value > other
-        return NotImplemented
+    def _apply_operator(self, operator, other):
+        """
+        Helper method to apply the specified operator to the int superclass
+        and wrap the result in a roman numeral with the same properties as
+        the current one.
 
-    def __lt__(self, other):
-        if isinstance(other, _RomanNumeral):
-            return self._value < other._value
-        if isinstance(other, int):
-            return self._value < other
-        return NotImplemented
-
-    def __ge__(self, other):
-        if isinstance(other, _RomanNumeral):
-            return self._value >= other._value
-        if isinstance(other, int):
-            return self._value >= other
-        return NotImplemented
-
-    def __le__(self, other):
-        if isinstance(other, _RomanNumeral):
-            return self._value <= other._value
-        if isinstance(other, int):
-            return self._value <= other
-        return NotImplemented
+        :param operator: The operator to apply.
+        :param other: The other roman numeral or int.
+        """
+        return _RomanNumeral(getattr(super(), operator)(other),
+                             self._encoding,
+                             self._uppercase,
+                             self._variant)
 
     def __add__(self, other):
-        if isinstance(other, _RomanNumeral):
-            return _RomanNumeral(self._value + other._value)
-        if isinstance(other, int):
-            return _RomanNumeral(self._value + other)
-        return NotImplemented
+        return self._apply_operator("__add__", other)
 
-    __radd__ = __add__
+    def __radd__(self, other):
+        return self._apply_operator("__radd__", other)
 
     def __sub__(self, other):
-        if isinstance(other, _RomanNumeral):
-            return _RomanNumeral(self._value - other._value)
-        if isinstance(other, int):
-            return _RomanNumeral(self._value - other)
-        return NotImplemented
+        return self._apply_operator("__sub__", other)
 
-    __rsub__ = __sub__
+    def __rsub__(self, other):
+        return self._apply_operator("__rsub__", other)
 
     def __mul__(self, other):
-        if isinstance(other, _RomanNumeral):
-            return _RomanNumeral(self._value * other._value)
-        if isinstance(other, int):
-            return _RomanNumeral(self._value * other)
-        return NotImplemented
+        return self._apply_operator("__mul__", other)
 
-    __rmul__ = __mul__
-
-    def __truediv__(self, other):
-        if isinstance(other, _RomanNumeral):
-            return _RomanNumeral(int(self._value / other._value))
-        if isinstance(other, int):
-            return _RomanNumeral(int(self._value / other))
-        return NotImplemented
-
-    __rtruediv__ = __truediv__
+    def __rmul__(self, other):
+        return self._apply_operator("__rmul__", other)
 
     def __floordiv__(self, other):
-        if isinstance(other, _RomanNumeral):
-            return _RomanNumeral(self._value // other._value)
-        if isinstance(other, int):
-            return _RomanNumeral(self._value // other)
-        return NotImplemented
+        return self._apply_operator("__floordiv__", other)
 
-    __rfloordiv__ = __floordiv__
+    def __rfloordiv__(self, other):
+        return self._apply_operator("__rfloordiv__", other)

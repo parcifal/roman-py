@@ -12,23 +12,21 @@ from importlib import metadata
 import tomli
 
 from .roman import (_RomanNumeral, _ENCODING_ASCII, _ENCODING_UNICODE,
-                    VARIANT_BASE,
-                    VARIANT_SUBTRACTIVE, VARIANT_SUBTRACTIVE_EXTENDED,
-                    VARIANT_APOSTROPHUS, VARIANT_MEDIEVAL)
-
-# pylint:disable = invalid-name
-_verbosity = 0
+                    VARIANT_BASE, VARIANT_SUBTRACTIVE,
+                    VARIANT_SUBTRACTIVE_EXTENDED, VARIANT_APOSTROPHUS,
+                    VARIANT_MEDIEVAL, VARIANT_ZERO)
 
 
-def _verbose_print(verbosity: int, message: str):
+def _verbose_print(current: int, required: int, message: str):
     """
-    Print the specified message if the specified verbosity leve is equal to or
-    greater than the current verbosity level.
+    Print the specified message if the current verbosity leve is equal to or
+    greater than the required verbosity level.
 
-    :param verbosity: The verbosity level.
+    :param current: The current verbosity level.
+    :param required: The required verbosity level.
     :param message: The message to print.
     """
-    if verbosity > _verbosity:
+    if current < required:
         return
     print(message)
 
@@ -48,11 +46,11 @@ def _version() -> str:
     with open(path, "rb") as file:
         toml = tomli.load(file)
     assert ("project" in toml and "version" in toml["project"]), \
-        "Missing version in pyproject.toml"
+        "missing version in pyproject.toml"
     return toml["project"]["version"]
 
 
-def run():
+def main():
     """
     Provide a CLI for converting decimal numbers to Roman numerals.
     """
@@ -95,6 +93,10 @@ def run():
                                     help="use the extended subtractive variant"
                                          "(includes subtractive)")
 
+    parser.add_argument("-z", "--zero",
+                        action="store_true",
+                        help="use the zero variant N")
+
     parser.add_argument("-p", "--apostrophus",
                         action="store_true",
                         help="use the apostrophus method for large numbers")
@@ -123,22 +125,20 @@ def run():
 
     args = parser.parse_args()
 
-    # pylint:disable = global-statement
-    global _verbosity
-    _verbosity = args.verbose
-
-    _verbose_print(2, f"verbosity {_verbosity}")
+    _verbose_print(args.verbose, 1, f"verbosity {args.verbose}")
 
     if not re.fullmatch(r"\d+", args.value):
         parser.error("value must be an integer")
 
     args.ASCII = not args.ascii and not args.unicode and not args.UNICODE
 
-    _verbose_print(2, "ascii mode" if args.ASCII else "unicode mode")
+    _verbose_print(args.verbose, 1,
+                   "ascii mode" if args.ASCII else "unicode mode")
 
     uppercase = args.ASCII or args.UNICODE
 
-    _verbose_print(2, "uppercase mode" if uppercase else "lowercase mode")
+    _verbose_print(args.verbose, 1,
+                   "uppercase mode" if uppercase else "lowercase mode")
 
     if args.ascii or args.ASCII:
         encoding = _ENCODING_ASCII
@@ -147,14 +147,16 @@ def run():
 
     variant = {}
 
-    args.subtractive = not args.no_base and not args.subtractive_extended
+    subtractive = args.subtractive or (not args.no_base and not args.subtractive_extended)
 
     if not args.no_base:
         variant = variant | VARIANT_BASE
-    if args.subtractive:
+    if subtractive:
         variant = variant | VARIANT_SUBTRACTIVE
     if args.subtractive_extended:
         variant = variant | VARIANT_SUBTRACTIVE_EXTENDED
+    if args.zero:
+        variant = variant | VARIANT_ZERO
     if args.apostrophus:
         variant = variant | VARIANT_APOSTROPHUS
     if args.medieval:
@@ -163,9 +165,11 @@ def run():
     if args.custom:
         for decimal, numeral in args.custom:
             variant[int(decimal)] = numeral
-            _verbose_print(2, f"custom numeral {numeral} ({decimal})")
+            _verbose_print(args.verbose, 1,
+                           f"custom numeral {numeral} ({decimal})")
 
-    _verbose_print(3, "\n".join(f"{d} = {n}" for d, n in variant.items()))
+    _verbose_print(args.verbose, 2,
+                   "\n".join(f"{d} = {n}" for d, n in variant.items()))
 
     return _RomanNumeral(int(args.value),
                          encoding=encoding,
@@ -174,4 +178,4 @@ def run():
 
 
 if __name__ == "__main__":
-    print(run())
+    print(main())
