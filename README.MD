@@ -4,19 +4,36 @@
 [![coverage report](https://gitlab.com/parcifal/roman-py/badges/master/coverage.svg)](https://gitlab.com/parcifal/roman-py/-/commits/master)
 [![PyPI version](https://img.shields.io/pypi/v/RomanPy)][pypi]
 
-RomanPy is a simple Python library for converting between decimal numbers and 
-Roman numerals. It supports ASCII and Unicode output, upper- and lowercase
-forms, and even allows arithmetic operations with Roman numerals.
+RomanPy is a Python library and CLI for converting decimal numbers to Roman 
+numerals. It provides:
+
+ - ASCII or Unicode output (with full support for Unicode numeral symbols)
+ - Upper- and lowercase variants
+ - Configurable numeral variants (subtractive, extended, apostrophus, medieval,
+   zero, or custom mappings)
+ - Arithmetic operations (+, -, *, //) between Roman numerals and integers
+ - Equality and comparison with ints and strings
 
 > Licensed under the [AGPLv3.0](LICENSE).
 
 ## Installation
 
+RomanPy is available on PyPI and can be installed using `pip`:
+
 ```bash
 pip install RomanPy
 ```
 
-## Usage
+Alternatively, you can pull the repository and install it straight from the 
+source:
+
+```bash
+git clone git@gitlab.com:parcifal/roman-py.git
+cd roman-py
+pip install .
+```
+
+## Usage (API)
 
 ### Basic Conversion
 
@@ -28,23 +45,13 @@ print(roman(207))  # CCVII
 
 ### Encoding and Case Variants
 
-RomanPy supports ASCII and Unicode numerals, both in upper- and lowercase,  
-using methods similar to Python’s built-in `str` API:
+```bash
+n = roman(1776)
 
-```python
-numeral = roman(1776)
-
-# ascii (default), uppercase (default)
-print(numeral.encode("ascii").upper())  # MDCCLXXVI
-
-# ascii, lowercase
-print(numeral.encode("ascii").lower())  # mdcclxxvi
-
-# unicode, uppercase
-print(numeral.encode("unicode").upper())  # ⅯⅮⅭⅭⅬⅩⅩⅥ
-
-# unicode, lowercase
-print(numeral.encode("unicode").lower())  # ⅿⅾⅽⅽⅼⅹⅹⅵ
+print(n.encode("ascii").upper())   # MDCCLXXVI
+print(n.encode("ascii").lower())   # mdcclxxvi
+print(n.encode("unicode").upper()) # ⅯⅮⅭⅭⅬⅩⅩⅥ
+print(n.encode("unicode").lower()) # ⅿⅾⅽⅽⅼⅹⅹⅵ
 ```
 
 ### Arithmetic with Roman Numerals
@@ -54,51 +61,73 @@ other Roman numerals or integers:
 
 ```python
 print(roman(100) + roman(60))   # CLX
-print(roman(45) - roman(7))     # XXXIX
-print(roman(533) * roman(2))    # MLXVI
-print(roman(2460) / roman(10))  # CCXLVI
+print(roman(45) - roman(7))     # XXXVIII
+print(roman(533) * 2)                   # MLXVI
+print(roman(2460) // 10)                # CCXLVI
 
-# mixing with integers
-print(100 + roman(60))          # CLX
-print(roman(45) - 7)            # XXXIX
-print(roman(533) * 2)           # MLXVI
-print(2460 / roman(10))         # CCXLVI
+# mix with ints
+print(100 + roman(60))                  # CLX
+print(roman(1954) == "MCMLIV")          # True
 ```
 
-### Comparisons
+### Custom Variants
 
-Equality works between Roman numerals, integers, and strings:
-
-```python
-print(roman(335) == roman(335))     # True
-print(roman(24) == 24)              # True
-print(roman(1954) == "MCMLIV")      # True
-```
-
-## Command-Line Tool
-
-Installing `RomanPy` also provides a `roman` CLI tool for quick conversions.
+You can extend or override numeral variants:
 
 ```bash
-roman 42 # = XLII
+from roman.roman import VARIANT_ZERO
+
+n = roman(0).extend_variant(VARIANT_ZERO)
+print(n)  # N
 ```
 
-### CLI Usage
-```help
-usage: roman [-h] [-a | -A | -u | -U] [-v] value
+Built-in variants include:
+
+ - `VARIANT_BASE` (I, V, X, …)
+ - `VARIANT_SUBTRACTIVE` (IV, IX, XL, …)
+ - `VARIANT_SUBTRACTIVE_EXTENDED` (IIX, IC, …)
+ - `VARIANT_ZERO` (N)
+ - `VARIANT_APOSTROPHUS` (large numbers with I) and ((I)))
+ - `VARIANT_MEDIEVAL` (A, Z, O, …)
+
+By default, `VARIANT_SUBTRACTIVE` is used.
+
+## Usage (CLI)
+
+Installing RomanPy also provides a roman command-line tool:
+
+```bash
+roman 42
+# = XLII
+```
+
+### Options
+
+```bash
+usage: roman [-h] [-a | -A | -u | -U] [-b | -s | -e] [-z] [-p] [-m] [-c DECIMAL NUMERAL] [-v] [-V] value
 
 Convert a decimal number to roman numeral.
 
 positional arguments:
-  value          a decimal number to convert to a Roman numeral
+  value                 a decimal number to convert to a roman numeral
 
 optional arguments:
-  -h, --help     show this help message and exit
-  -a, --ascii    output encoding of Roman numerals in lowercase ASCII
-  -A, --ASCII    output encoding of Roman numerals in uppercase ASCII (default)
-  -u, --unicode  output encoding of Roman numerals in lowercase unicode
-  -U, --UNICODE  output encoding of Roman numerals in uppercase unicode
-  -v, --version  show program's version number and exit
+  -h, --help            show this help message and exit
+  -a, --ascii           output encoding of roman numerals in lowercase ascii
+  -A, --ASCII           output encoding of roman numerals in uppercase ascii (default)
+  -u, --unicode         output encoding of roman numerals in lowercase unicode
+  -U, --UNICODE         output encoding of roman numerals in uppercase unicode
+  -b, --no-base         do not use the base variant
+  -s, --subtractive     use the subtractive variant (includes base) (default)
+  -e, --subtractive-extended
+                        use the extended subtractive variant(includes subtractive)
+  -z, --zero            use the zero variant N
+  -p, --apostrophus     use the apostrophus method for large numbers
+  -m, --medieval        use the medieval variant
+  -c DECIMAL NUMERAL, --custom DECIMAL NUMERAL
+                        map a decimal number to a roman numeral
+  -v, --verbose         increase verbosity
+  -V, --version         show program's version number and exit
 ```
 
 ## Contributing
