@@ -133,7 +133,7 @@ optional arguments:
 ## Contributing
 
 Found a bug? Have a suggestion? Open an issue or submit a merge request at 
-[the GitLab repository](https://gitlab.com/parcifal/roman-py). All 
+[the Forgejo repository](https://forgejo.parcifal.dev/parcifal/roman-py). All 
 contributions are welcome.
 
 [license]: https://forgejo.parcifal.dev/parcifal/roman-py/src/branch/master/LICENSE
