@@ -1,8 +1,8 @@
 # RomanPy
 
-[![pipeline status](https://gitlab.com/parcifal/roman-py/badges/master/pipeline.svg)](https://gitlab.com/parcifal/roman-py/-/pipelines)
-[![coverage report](https://gitlab.com/parcifal/roman-py/badges/master/coverage.svg)](https://gitlab.com/parcifal/roman-py/-/commits/master)
-[![PyPI version](https://img.shields.io/pypi/v/RomanPy)][pypi]
+[![develop](https://forgejo.parcifal.dev/parcifal/roman-py/badges/workflows/push.yml/badge.svg?label=develop&branch=develop)][develop]
+[![master](https://forgejo.parcifal.dev/parcifal/roman-py/badges/workflows/push.yml/badge.svg?label=master&branch=master)][master]
+[![pypi.org](https://img.shields.io/pypi/v/RomanPy?label=pypi.org)][pypi]
 
 RomanPy is a Python library and CLI for converting decimal numbers to Roman 
 numerals. It provides:
@@ -28,7 +28,7 @@ Alternatively, you can pull the repository and install it straight from the
 source:
 
 ```bash
-git clone git@gitlab.com:parcifal/roman-py.git
+git clone git@forgejo.parcifal.dev:parcifal/roman-py.git
 cd roman-py
 pip install .
 ```
@@ -62,12 +62,12 @@ other Roman numerals or integers:
 ```python
 print(roman(100) + roman(60))   # CLX
 print(roman(45) - roman(7))     # XXXVIII
-print(roman(533) * 2)                   # MLXVI
-print(roman(2460) // 10)                # CCXLVI
+print(roman(533) * 2)           # MLXVI
+print(roman(2460) // 10)        # CCXLVI
 
 # mix with ints
-print(100 + roman(60))                  # CLX
-print(roman(1954) == "MCMLIV")          # True
+print(100 + roman(60))          # CLX
+print(roman(1954) == "MCMLIV")  # True
 ```
 
 ### Custom Variants
@@ -135,5 +135,10 @@ optional arguments:
 Found a bug? Have a suggestion? Open an issue or submit a merge request at 
 [the GitLab repository](https://gitlab.com/parcifal/roman-py). All 
 contributions are welcome.
+
+[license]: https://forgejo.parcifal.dev/parcifal/roman-py/src/branch/master/LICENSE
+
+[develop]: https://forgejo.parcifal.dev/parcifal/roman-py/src/branch/develop
+[master]: https://forgejo.parcifal.dev/parcifal/roman-py/src/branch/master
 
 [pypi]: https://pypi.org/project/RomanPy/
