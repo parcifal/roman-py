@@ -1,8 +1,11 @@
 # RomanPy
 
+[![release](https://img.shields.io/gitea/v/release/parcifal/roman-py?gitea_url=https%3A%2F%2Fforgejo.parcifal.dev&label=latest+release)][release]
+[![pypi](https://img.shields.io/pypi/v/RomanPy?label=pypi+release)][pypi]
 [![develop](https://forgejo.parcifal.dev/parcifal/roman-py/badges/workflows/push.yml/badge.svg?label=develop&branch=develop)][develop]
 [![master](https://forgejo.parcifal.dev/parcifal/roman-py/badges/workflows/push.yml/badge.svg?label=master&branch=master)][master]
-[![pypi.org](https://img.shields.io/pypi/v/RomanPy?label=pypi.org)][pypi]
+[![gitlab](https://img.shields.io/gitlab/last-commit/parcifal%2Froman-py?label=gitlab+mirror)][gitlab]
+[![github](https://img.shields.io/github/last-commit/parcifal%2Froman-py?label=github+mirror)][github]
 
 RomanPy is a Python library and CLI for converting decimal numbers to Roman 
 numerals. It provides:
@@ -14,7 +17,7 @@ numerals. It provides:
  - Arithmetic operations (+, -, *, //) between Roman numerals and integers
  - Equality and comparison with ints and strings
 
-> Licensed under the [AGPLv3.0](LICENSE).
+> Licensed under the [AGPLv3.0][license].
 
 ## Installation
 
@@ -138,6 +141,9 @@ contributions are welcome.
 
 [license]: https://forgejo.parcifal.dev/parcifal/roman-py/src/branch/master/LICENSE
 
+[release]: https://forgejo.parcifal.dev/parcifal/roman-py/releases/latest
+[gitlab]: https://gitlab.com/parcifal/roman-py
+[github]: https://github.com/parcifal/roman-py
 [develop]: https://forgejo.parcifal.dev/parcifal/roman-py/src/branch/develop
 [master]: https://forgejo.parcifal.dev/parcifal/roman-py/src/branch/master
 
