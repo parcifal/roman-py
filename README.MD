@@ -1,11 +1,13 @@
 # RomanPy
 
-[![release](https://img.shields.io/gitea/v/release/parcifal/roman-py?gitea_url=https%3A%2F%2Fforgejo.parcifal.dev&label=latest+release)][release]
+[![release](https://img.shields.io/gitea/v/release/parcifal/RomanPy?gitea_url=https%3A%2F%2Fscm.parcifal.dev&label=latest+release)][release]
 [![pypi](https://img.shields.io/pypi/v/RomanPy?label=pypi+release)][pypi]
-[![develop](https://forgejo.parcifal.dev/parcifal/roman-py/badges/workflows/push.yml/badge.svg?label=develop&branch=develop)][develop]
-[![master](https://forgejo.parcifal.dev/parcifal/roman-py/badges/workflows/push.yml/badge.svg?label=master&branch=master)][master]
-[![gitlab](https://img.shields.io/gitlab/last-commit/parcifal%2Froman-py?label=gitlab+mirror)][gitlab]
-[![github](https://img.shields.io/github/last-commit/parcifal%2Froman-py?label=github+mirror)][github]
+[![develop](https://scm.parcifal.dev/parcifal/RomanPy/badges/workflows/push.yml/badge.svg?label=develop&branch=develop)][develop]
+[![master](https://scm.parcifal.dev/parcifal/RomanPy/badges/workflows/push.yml/badge.svg?label=master&branch=master)][master]
+[![gitlab](https://img.shields.io/gitlab/last-commit/parcifal%2FRomanPy?label=gitlab+mirror)][gitlab]
+[![github](https://img.shields.io/github/last-commit/parcifal%2FRomanPy?label=github+mirror)][github]
+
+![RomanPy Logo](https://scm.parcifal.dev/parcifal/RomanPy/raw/branch/develop/assets/logo.png)
 
 RomanPy is a Python library and CLI for converting decimal numbers to Roman 
 numerals. It provides:
@@ -31,8 +33,8 @@ Alternatively, you can pull the repository and install it straight from the
 source:
 
 ```bash
-git clone git@forgejo.parcifal.dev:parcifal/roman-py.git
-cd roman-py
+git clone git@scm.parcifal.dev:parcifal/RomanPy.git
+cd RomanPy
 pip install .
 ```
 
@@ -136,15 +138,15 @@ optional arguments:
 ## Contributing
 
 Found a bug? Have a suggestion? Open an issue or submit a merge request at 
-[the Forgejo repository](https://forgejo.parcifal.dev/parcifal/roman-py). All 
+[the Forgejo repository](https://scm.parcifal.dev/parcifal/RomanPy). All 
 contributions are welcome.
 
-[license]: https://forgejo.parcifal.dev/parcifal/roman-py/src/branch/master/LICENSE
+[license]: https://scm.parcifal.dev/parcifal/RomanPy/src/branch/master/LICENSE
 
-[release]: https://forgejo.parcifal.dev/parcifal/roman-py/releases/latest
-[gitlab]: https://gitlab.com/parcifal/roman-py
-[github]: https://github.com/parcifal/roman-py
-[develop]: https://forgejo.parcifal.dev/parcifal/roman-py/src/branch/develop
-[master]: https://forgejo.parcifal.dev/parcifal/roman-py/src/branch/master
+[release]: https://scm.parcifal.dev/parcifal/RomanPy/releases/latest
+[gitlab]: https://gitlab.com/parcifal/RomanPy
+[github]: https://github.com/parcifal/RomanPy
+[develop]: https://scm.parcifal.dev/parcifal/RomanPy/src/branch/develop
+[master]: https://scm.parcifal.dev/parcifal/RomanPy/src/branch/master
 
 [pypi]: https://pypi.org/project/RomanPy/
