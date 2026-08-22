@@ -23,8 +23,8 @@ classifiers   = [
 dependencies = [ "tomli" ]
 
 [project.urls]
-"Homepage"     = "https://forgejo.parcifal.dev/parcifal/roman-py"
-"Bug Tracker"  = "https://forgejo.parcifal.dev/parcifal/roman-py/issues"
+"Homepage"     = "https://scm.parcifal.dev/parcifal/RomanPy"
+"Bug Tracker"  = "https://scm.parcifal.dev/parcifal/RomanPy/issues"
 
 [project.scripts]
 roman = "roman.cli:main"
